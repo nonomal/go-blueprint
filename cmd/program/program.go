@@ -4,6 +4,7 @@ package program
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -254,22 +255,22 @@ func (p *Project) CreateMainFile() error {
 	if p.DBDriver != "none" {
 
 		err = p.CreateFileWithInjection(root, projectPath, ".env.example", "env-example")
-    		if err != nil {
-    		    log.Printf("Error injecting .env.example file: %v", err)
-    		    cobra.CheckErr(err)
-    		    return err
-    		}
+		if err != nil {
+			log.Printf("Error injecting .env.example file: %v", err)
+			cobra.CheckErr(err)
+			return err
+		}
 
 		if p.DBDriver != "sqlite" {
-    		p.createDockerMap()
-    		p.Docker = p.DBDriver
+			p.createDockerMap()
+			p.Docker = p.DBDriver
 
-    		err = p.CreateFileWithInjection(root, projectPath, "docker-compose.yml", "db-docker")
-    		if err != nil {
-    		    log.Printf("Error injecting docker-compose.yml file: %v", err)
-    		    cobra.CheckErr(err)
-    		    return err
-    		}
+			err = p.CreateFileWithInjection(root, projectPath, "docker-compose.yml", "db-docker")
+			if err != nil {
+				log.Printf("Error injecting docker-compose.yml file: %v", err)
+				cobra.CheckErr(err)
+				return err
+			}
 		} else {
 			fmt.Println("\nWe are unable to create docker-compose.yml file for an SQLite database")
 		}
@@ -483,8 +484,8 @@ func (p *Project) CreateFileWithInjection(pathToCreate string, projectPath strin
 		createdTemplate := template.Must(template.New(fileName).Parse(string(p.DockerMap[p.Docker].templater.Docker())))
 		err = createdTemplate.Execute(createdFile, p)
 	case "env-example":
-    createdTemplate := template.Must(template.New(fileName).Parse(string(p.DBDriverMap[p.DBDriver].templater.EnvExample())))
-    err = createdTemplate.Execute(createdFile, p)
+		createdTemplate := template.Must(template.New(fileName).Parse(string(p.DBDriverMap[p.DBDriver].templater.EnvExample())))
+		err = createdTemplate.Execute(createdFile, p)
 	case "env":
 		if p.DBDriver != "none" {
 
