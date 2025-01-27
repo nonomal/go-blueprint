@@ -21,7 +21,7 @@ type Steps struct {
 // An Item contains the data for each option
 // in a StepSchema.Options
 type Item struct {
-	Title, Desc string
+	Flag, Title, Desc string
 }
 
 // InitSteps initializes and returns the *Steps to be used in the CLI program
@@ -80,11 +80,71 @@ func InitSteps(projectType flags.Framework, databaseType flags.Database) *Steps 
 						Title: "Mongo",
 						Desc:  "The MongoDB supported driver for Go."},
 					{
+						Title: "Redis",
+						Desc:  "Redis driver for Go."},
+					{
+						Title: "Scylla",
+						Desc:  "ScyllaDB Enhanced driver from GoCQL."},
+					{
 						Title: "None",
 						Desc:  "Choose this option if you don't wish to install a specific database driver."},
 				},
 				Headers: "What database driver do you want to use in your Go project?",
 				Field:   databaseType.String(),
+			},
+			"advanced": {
+				StepName: "Advanced Features",
+				Headers:  "Which advanced features do you want?",
+				Options: []Item{
+					{
+						Flag:  "React",
+						Title: "React",
+						Desc:  "Use Vite to spin up a React project in TypeScript. This disables selecting HTMX/Templ",
+					},
+					{
+						Flag:  "Htmx",
+						Title: "HTMX/Templ",
+						Desc:  "Add starter HTMX and Templ files. This disables selecting React",
+					},
+					{
+						Flag:  "GitHubAction",
+						Title: "Go Project Workflow",
+						Desc:  "Workflow templates for testing, cross-compiling and releasing Go projects",
+					},
+					{
+						Flag:  "Websocket",
+						Title: "Websocket endpoint",
+						Desc:  "Add a websocket endpoint",
+					},
+					{
+						Flag:  "Tailwind",
+						Title: "TailwindCSS",
+						Desc:  "A utility-first CSS framework (selecting this will automatically add HTMX unless React is specified)",
+					},
+					{
+						Flag:  "Docker",
+						Title: "Docker",
+						Desc:  "Dockerfile and docker-compose generic configuration for go project",
+					},
+				},
+			},
+			"git": {
+				StepName: "Git Repository",
+				Headers:  "Which git option would you like to select for your project?",
+				Options: []Item{
+					{
+						Title: "Commit",
+						Desc:  "Initialize a new git repository and commit all the changes",
+					},
+					{
+						Title: "Stage",
+						Desc:  "Initialize a new git repository but only stage the changes",
+					},
+					{
+						Title: "Skip",
+						Desc:  "Proceed without initializing a git repository",
+					},
+				},
 			},
 		},
 	}

@@ -2,13 +2,13 @@ package framework
 
 import (
 	_ "embed"
+
+	"github.com/melkeydev/go-blueprint/cmd/template/advanced"
 )
 
 //go:embed files/routes/gorilla.go.tmpl
 var gorillaRoutesTemplate []byte
 
-//go:embed files/dbRoutes/gorilla.go.tmpl
-var gorillaDBRoutesTemplate []byte
 //go:embed files/tests/default-test.go.tmpl
 var gorillaTestHandlerTemplate []byte
 
@@ -24,17 +24,22 @@ func (g GorillaTemplates) Server() []byte {
 	return standardServerTemplate
 }
 
-func (g GorillaTemplates) ServerWithDB() []byte {
-	return standardDBServerTemplate
-}
-
 func (g GorillaTemplates) Routes() []byte {
 	return gorillaRoutesTemplate
 }
 
-func (g GorillaTemplates) RoutesWithDB() []byte {
-	return gorillaDBRoutesTemplate
-}
 func (g GorillaTemplates) TestHandler() []byte {
-    return gorillaTestHandlerTemplate
+	return gorillaTestHandlerTemplate
+}
+
+func (g GorillaTemplates) HtmxTemplImports() []byte {
+	return advanced.StdLibHtmxTemplImportsTemplate()
+}
+
+func (g GorillaTemplates) HtmxTemplRoutes() []byte {
+	return advanced.GorillaHtmxTemplRoutesTemplate()
+}
+
+func (g GorillaTemplates) WebsocketImports() []byte {
+	return advanced.StdLibWebsocketTemplImportsTemplate()
 }

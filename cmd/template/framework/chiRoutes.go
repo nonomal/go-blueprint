@@ -2,13 +2,13 @@ package framework
 
 import (
 	_ "embed"
+
+	"github.com/melkeydev/go-blueprint/cmd/template/advanced"
 )
 
 //go:embed files/routes/chi.go.tmpl
 var chiRoutesTemplate []byte
 
-//go:embed files/dbRoutes/chi.go.tmpl
-var chiDBRoutesTemplate []byte
 //go:embed files/tests/default-test.go.tmpl
 var chiTestHandlerTemplate []byte
 
@@ -24,19 +24,22 @@ func (c ChiTemplates) Server() []byte {
 	return standardServerTemplate
 }
 
-func (c ChiTemplates) ServerWithDB() []byte {
-	return standardDBServerTemplate
-}
-
 func (c ChiTemplates) Routes() []byte {
 	return chiRoutesTemplate
 }
 
-func (c ChiTemplates) RoutesWithDB() []byte {
-	return chiDBRoutesTemplate
-}
-
 func (c ChiTemplates) TestHandler() []byte {
-    return chiTestHandlerTemplate
+	return chiTestHandlerTemplate
 }
 
+func (c ChiTemplates) HtmxTemplImports() []byte {
+	return advanced.StdLibHtmxTemplImportsTemplate()
+}
+
+func (c ChiTemplates) HtmxTemplRoutes() []byte {
+	return advanced.ChiHtmxTemplRoutesTemplate()
+}
+
+func (c ChiTemplates) WebsocketImports() []byte {
+	return advanced.StdLibWebsocketTemplImportsTemplate()
+}

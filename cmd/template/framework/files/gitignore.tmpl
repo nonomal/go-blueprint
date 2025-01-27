@@ -24,3 +24,16 @@ tmp/
 
 # .env file
 .env
+
+# Project build
+main
+*templ.go
+
+# OS X generated file
+.DS_Store
+{{if ( .AdvancedOptions.tailwind )}}
+
+# Tailwind CSS
+cmd/web/assets/css/output.css
+tailwindcss
+{{end}}

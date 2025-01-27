@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"regexp"
+	"strings"
 
 	"github.com/spf13/pflag"
 )
@@ -19,7 +21,23 @@ func NonInteractiveCommand(use string, flagSet *pflag.FlagSet) string {
 
 	visitFn := func(flag *pflag.Flag) {
 		if flag.Name != "help" {
-			nonInteractiveCommand = fmt.Sprintf("%s --%s %s", nonInteractiveCommand, flag.Name, flag.Value.String())
+			if flag.Name == "feature" {
+				featureFlagsString := ""
+				// Creates string representation for the feature flags to be
+				// concatenated with the nonInteractiveCommand
+				for _, k := range strings.Split(flag.Value.String(), ",") {
+					if k != "" {
+						featureFlagsString += fmt.Sprintf(" --feature %s", k)
+					}
+				}
+				nonInteractiveCommand += featureFlagsString
+			} else if flag.Value.Type() == "bool" {
+				if flag.Value.String() == "true" {
+					nonInteractiveCommand = fmt.Sprintf("%s --%s", nonInteractiveCommand, flag.Name)
+				}
+			} else {
+				nonInteractiveCommand = fmt.Sprintf("%s --%s %s", nonInteractiveCommand, flag.Name, flag.Value.String())
+			}
 		}
 	}
 
@@ -27,14 +45,6 @@ func NonInteractiveCommand(use string, flagSet *pflag.FlagSet) string {
 	flagSet.VisitAll(visitFn)
 
 	return nonInteractiveCommand
-}
-
-func HasChangedFlag(flagSet *pflag.FlagSet) bool {
-	hasChangedFlag := false
-	flagSet.Visit(func(_ *pflag.Flag) {
-		hasChangedFlag = true
-	})
-	return hasChangedFlag
 }
 
 // ExecuteCmd provides a shorthand way to run a shell command
@@ -87,10 +97,54 @@ func GoFmt(appDir string) error {
 	return nil
 }
 
+// GoModReplace runs "go mod edit -replace" in the selected
+// replace_payload e.g: github.com/gocql/gocql=github.com/scylladb/gocql@v1.14.4
+func GoModReplace(appDir string, replace string) error {
+	if err := ExecuteCmd("go",
+		[]string{"mod", "edit", "-replace", replace},
+		appDir,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GoTidy(appDir string) error {
 	err := ExecuteCmd("go", []string{"mod", "tidy"}, appDir)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func CheckGitConfig(key string) (bool, error) {
+	cmd := exec.Command("git", "config", "--get", key)
+	if err := cmd.Run(); err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			// The command failed to run.
+			if exitError.ExitCode() == 1 {
+				// The 'git config --get' command returns 1 if the key was not found.
+				return false, nil
+			}
+		}
+		// Some other error occurred.
+		return false, err
+	}
+	// The command ran successfully, so the key is set.
+	return true, nil
+}
+
+// ValidateModuleName returns true if it's a valid module name.
+// It allows any number of / and . characters in between.
+func ValidateModuleName(moduleName string) bool {
+	matched, _ := regexp.MatchString("^[a-zA-Z0-9_-]+(?:[\\/.][a-zA-Z0-9_-]+)*$", moduleName)
+	return matched
+}
+
+// GetRootDir returns the project directory name from the module path.
+// Returns the last token by splitting the moduleName with /
+func GetRootDir(moduleName string) string {
+	tokens := strings.Split(moduleName, "/")
+	return tokens[len(tokens)-1]
 }
